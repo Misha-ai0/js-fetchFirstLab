@@ -1,16 +1,38 @@
-"Ваш код повинен зробити POST-запит до вказаного URL."
-"Для створення нового користувача, передайте в запит наступні дані:"
-"name: ваше ім’я"
-"email: ваш email"
-"Поверніть відповідь від сервера після створення користувача."
+const https = require('https');
 
-"https://jsonplaceholder.typicode.com/users - адреса куди робити запит"
+function fetchUsers() {
+    const options = {
+        hostname: 'jsonplaceholder.typicode.com',
+        path: '/users',
+        method: 'GET'
+    };
 
+    return new Promise((resolve, reject) => {
+        const req = https.request(options, (res) => {
+            let data = '';
 
-function createUser(user) {
-  // Ваш код
+            res.on('data', (chunk) => {
+                data += chunk;
+            });
+
+            res.on('end', () => {
+                try {
+                    const users = JSON.parse(data);
+                    const result = users.map(user => ({ id: user.id, name: user.name }));
+                    resolve(result);
+                } catch (error) {
+                    reject(error);  
+                }
+            });
+        });
+
+        req.on('error', (error) => {
+            reject(error);  
+        });
+
+        req.end();
+    });
 }
+console.log(fetchUsers())
 
-console.log(createUser({name: "Sam", email: "fjsnfkjns2342@gmail.com"}))
-
-module.exports = createUser;
+module.exports = fetchUsers;
